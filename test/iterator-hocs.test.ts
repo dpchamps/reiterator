@@ -1,93 +1,102 @@
-import {testing} from '../deps.ts';
-import {reduceIterableSync, mapIterableSync, filterIterableSync, forEachIterableSync} from '../src/iterator-hocs.ts'
-import {takeN, count} from '../src/iterators.ts';
-const {assertEquals} = testing;
+import { testing } from "../deps.ts";
+import {
+  reduceIterableSync,
+  mapIterableSync,
+  filterIterableSync,
+  forEachIterableSync,
+} from "../src/iterator-hocs.ts";
+import { takeN, count } from "../src/iterators.ts";
+const { assertEquals } = testing;
 
-const reduceFib = ([n1, n2, n3] : [number, number, number], _ : any, x : number) : [number, number, number] => {
-    if(x === 0) return [x, 0, x];
-    if(x === 1) return [n1, n2, x];
-    
-    return [
-        n2,
-        n3,
-        n3 + n2
-    ]
+const reduceFib = (
+  [n1, n2, n3]: [number, number, number],
+  _: any,
+  x: number,
+): [number, number, number] => {
+  if (x === 0) return [x, 0, x];
+  if (x === 1) return [n1, n2, x];
+
+  return [
+    n2,
+    n3,
+    n3 + n2,
+  ];
+};
+
+function* fibGen() {
+  let memo = [0, 1, 0];
+
+  yield 0;
+  yield 1;
+
+  while (true) {
+    memo[2] = memo[0] + memo[1];
+    yield memo[2];
+    memo[0] = memo[1];
+    memo[1] = memo[2];
+  }
 }
 
-function* fibGen(){
-   let memo = [0, 1, 0];
+Deno.test("It reduces an iterable to a value", () => {
+  const iterableLike = Array(8);
 
-   yield 0;
-   yield 1;
+  const reduce = reduceIterableSync(iterableLike)(reduceFib, [0, 0, 0]);
 
-   while(true){
-       memo[2] = memo[0] + memo[1];
-       yield memo[2];
-       memo[0] = memo[1];
-       memo[1] = memo[2];
-   }
-}
-
-
-Deno.test('It reduces an iterable to a value', () => {
-    const iterableLike = Array(8);
-
-    const reduce = reduceIterableSync(iterableLike)(reduceFib, [0, 0, 0]);
-
-    assertEquals(
-        reduce,
-        [5,8,13]
-    );
+  assertEquals(
+    reduce,
+    [5, 8, 13],
+  );
 });
 
-Deno.test('It maps values', () => {
-    const mapFib = mapIterableSync(takeN(fibGen(), 5))(
-        (el, idx) => el + idx
-    );
+Deno.test("It maps values", () => {
+  const mapFib = mapIterableSync(takeN(fibGen(), 5))(
+    (el, idx) => el + idx,
+  );
 
-    assertEquals(
-        Array.from(mapFib),
-        [ 0, 2, 3, 5, 7 ]
-    );
-})
-
-Deno.test('It filters an iterable', () => {
-    const evenFib = filterIterableSync(takeN(fibGen(), 10))(
-        (item : number) : item is number => item % 2 === 0 
-    );
-
-    assertEquals(
-        Array.from(evenFib),
-        [0, 2, 8, 34]
-    )
+  assertEquals(
+    Array.from(mapFib),
+    [0, 2, 3, 5, 7],
+  );
 });
 
-Deno.test('Map/Filter/Reduce composition', () => {
-    const baseIter = takeN(count(), 10);
-    const sum = (a : number, b : number) => a+b;
-    const square = (x: number) => x*x;
-    const isOdd = (x: number) => (x/2|0) !== (x/2);
+Deno.test("It filters an iterable", () => {
+  const evenFib = filterIterableSync(takeN(fibGen(), 10))(
+    (item: number): item is number => item % 2 === 0,
+  );
 
-    const expectedResult = square(1) + square(3) + square(5) + square(7) + square(9);
-
-    const composedIterator = mapIterableSync(
-        filterIterableSync(baseIter)(isOdd)
-    )(square);
-
-    assertEquals(
-        reduceIterableSync(composedIterator)(sum, 0),
-        expectedResult
-    )
+  assertEquals(
+    Array.from(evenFib),
+    [0, 2, 8, 34],
+  );
 });
 
-Deno.test('ForEach should consume the iterator', () => {
-    const numbers = takeN(count(1), 10);
-    let pointer = 0
-    forEachIterableSync(numbers)((item, index) => {
-        assertEquals( item, pointer + 1 );
-        assertEquals( index, pointer );
-        pointer += 1;
-    });
+Deno.test("Map/Filter/Reduce composition", () => {
+  const baseIter = takeN(count(), 10);
+  const sum = (a: number, b: number) => a + b;
+  const square = (x: number) => x * x;
+  const isOdd = (x: number) => (x / 2 | 0) !== (x / 2);
 
-    assertEquals(numbers.next().done, true)
+  const expectedResult = square(1) + square(3) + square(5) + square(7) +
+    square(9);
+
+  const composedIterator = mapIterableSync(
+    filterIterableSync(baseIter)(isOdd),
+  )(square);
+
+  assertEquals(
+    reduceIterableSync(composedIterator)(sum, 0),
+    expectedResult,
+  );
+});
+
+Deno.test("ForEach should consume the iterator", () => {
+  const numbers = takeN(count(1), 10);
+  let pointer = 0;
+  forEachIterableSync(numbers)((item, index) => {
+    assertEquals(item, pointer + 1);
+    assertEquals(index, pointer);
+    pointer += 1;
+  });
+
+  assertEquals(numbers.next().done, true);
 });
