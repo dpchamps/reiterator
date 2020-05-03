@@ -24,9 +24,9 @@ export const pumpIter = <T, TReturn, TNext>(
 export const transformIterator = <T, TReturn, TNext>(
   iterator: Iterator<T, TReturn, TNext>,
 ) =>
-  //@ts-ignore
   <U extends T, UReturn extends TReturn, UNext>(
     callback: TransformIteratorCallback<T, TReturn>,
+    //@ts-ignore
   ): ReIterator<U, UReturn, UNext> => ({
     [Symbol.iterator]() {
       return this;
