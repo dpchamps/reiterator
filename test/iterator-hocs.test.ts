@@ -70,6 +70,13 @@ Deno.test("It filters an iterable", () => {
   );
 });
 
+Deno.test("filterIterableSync - returns an empty array when no elements satisfy a condition", () => {
+  assertEquals(
+    Array.from(filterIterableSync(takeN(count(5), 5))((el) => el < 5)),
+    [],
+  );
+});
+
 Deno.test("Map/Filter/Reduce composition", () => {
   const baseIter = takeN(count(), 10);
   const sum = (a: number, b: number) => a + b;

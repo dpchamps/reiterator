@@ -109,8 +109,8 @@ export const repeat = <T>(value: T): ReIterator<T, T, unknown> => ({
   }),
 });
 
-export const cycle = <T>(iterator: Iterable<T>): ReIterator<T, T, unknown> => {
-  const iterable = iterator[Symbol.iterator]();
+export const cycle = <T>(iterable: Iterable<T>): ReIterator<T, T, unknown> => {
+  const iterator = iterable[Symbol.iterator]();
   const queue: any[] = [];
 
   return {
@@ -119,7 +119,7 @@ export const cycle = <T>(iterator: Iterable<T>): ReIterator<T, T, unknown> => {
     },
     //@ts-ignore
     next() {
-      const { value, done } = iterable.next();
+      const { value, done } = iterator.next();
 
       done ? queue.unshift(queue.pop()) : queue.unshift(value);
 
@@ -127,6 +127,32 @@ export const cycle = <T>(iterator: Iterable<T>): ReIterator<T, T, unknown> => {
         value: queue[0],
         done: false,
       };
+    },
+  };
+};
+
+export const chain = <T extends any>(
+  ...iterables: Iterable<T>[]
+): ReIterator<T, T, unknown> => {
+  const iterators = iterables.map((x) => x[Symbol.iterator]());
+  const getNext = (): IteratorResult<T, T> => {
+    const { value, done } = iterators[0].next();
+    if (done) {
+      iterators.shift();
+      return iterators.length
+        ? getNext()
+        : { value: undefined as unknown as any, done: true };
+    }
+
+    return { value, done };
+  };
+
+  return {
+    [Symbol.iterator]() {
+      return this;
+    },
+    next() {
+      return getNext();
     },
   };
 };

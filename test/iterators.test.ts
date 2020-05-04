@@ -6,6 +6,7 @@ import {
   range,
   repeat,
   cycle,
+  chain,
 } from "../src/iterators.ts";
 import { testing } from "../deps.ts";
 
@@ -86,9 +87,15 @@ Deno.test("it should repeat a value", () => {
 });
 
 Deno.test("it should cycle iterators", () => {
-  const x = takeN(cycle("ABC"), 6);
   assertEquals(
     Array.from(takeN(cycle("ABC"), 6)),
     ["A", "B", "C", "A", "B", "C"],
+  );
+});
+
+Deno.test("chain -- It should chain multiple iterators", () => {
+  assertEquals(
+    Array.from(chain<string | number>([1, 2, 3, 4], "ABCD")),
+    [1, 2, 3, 4, "A", "B", "C", "D"],
   );
 });
