@@ -7,6 +7,7 @@ import {
   repeat,
   cycle,
   chain,
+  zip,
 } from "../src/iterators.ts";
 import { testing } from "../deps.ts";
 
@@ -48,6 +49,7 @@ Deno.test("counts upwards indefinitely", () => {
 });
 
 Deno.test("it enumerates", () => {
+  const test = [{ x: "a" }, { y: "b" }];
   const enumerater = enumerate(count(1));
   assertEquals(
     enumerater.next(),
@@ -72,10 +74,17 @@ Deno.test("it steps by a delta", () => {
   );
 });
 
-Deno.test("it should return a range", () => {
+Deno.test("range -- it should return a range", () => {
   assertEquals(
     Array.from(range(0, 10)),
     [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+  );
+});
+
+Deno.test("range -- it should return a range not starting from zero", () => {
+  assertEquals(
+    Array.from(range(5, 10)),
+    [5, 6, 7, 8, 9],
   );
 });
 
@@ -97,5 +106,16 @@ Deno.test("chain -- It should chain multiple iterators", () => {
   assertEquals(
     Array.from(chain<string | number>([1, 2, 3, 4], "ABCD")),
     [1, 2, 3, 4, "A", "B", "C", "D"],
+  );
+});
+
+Deno.test("zip -- It should zip mutiple iterators of equal length", () => {
+  const i1 = range(0, 4);
+  const i2 = range(1, 5);
+  const i3 = range(2, 6);
+
+  assertEquals(
+    Array.from(zip(i1, i2, i3)),
+    [[0, 1, 2], [1, 2, 3], [2, 3, 4], [3, 4, 5]],
   );
 });

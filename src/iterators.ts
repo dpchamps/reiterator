@@ -1,14 +1,5 @@
 import { ReIterator } from "./common.ts";
 
-/**
- * Bummer!
- * Tons of open issues in TS-land around typing iterators. Can't tell if I'm a dummy of typescript if failing me:
- * 
- * https://github.com/microsoft/TypeScript/issues/31214
- * https://github.com/microsoft/TypeScript/issues/32890
- * https://github.com/microsoft/TypeScript/issues/32728
- */
-
 type TransformIteratorCallback<T, TReturn> = <U, UReturn>(
   result: IteratorResult<T, TReturn>,
 ) => IteratorResult<U, UReturn>;
@@ -21,13 +12,12 @@ export const pumpIter = <T, TReturn, TNext>(
     return iter;
   };
 
-export const transformIterator = <T, TReturn, TNext>(
-  iterator: Iterator<T, TReturn, TNext>,
+export const transformIterator = <T>(
+  iterator: Iterator<T, any, undefined>,
 ) =>
-  <U extends T, UReturn extends TReturn, UNext>(
-    callback: TransformIteratorCallback<T, TReturn>,
-    //@ts-ignore
-  ): ReIterator<U, UReturn, UNext> => ({
+  <U, UReturn = any>(
+    callback: TransformIteratorCallback<T, any>,
+  ): ReIterator<U, UReturn, undefined> => ({
     [Symbol.iterator]() {
       return this;
     },
@@ -37,14 +27,13 @@ export const transformIterator = <T, TReturn, TNext>(
 export const takeN = <T>(
   iterable: Iterable<T>,
   n: number,
-): ReIterator<T, T, T> => {
+): ReIterator<T, unknown, undefined> => {
   const iterator = iterable[Symbol.iterator]();
   let ticks = 0;
-  // @ts-ignore
   return transformIterator(iterator)(({ value, done }) => {
     ticks += 1;
     return {
-      value: value,
+      value,
       done: ticks > n || done,
     };
   });
@@ -68,11 +57,9 @@ export const enumerate = <T>(
   let idx = 0;
   let iterator = iterable[Symbol.iterator]();
 
-  //@ts-ignore
   return transformIterator(iterator)(
     ({ value, done }) => ({
-      //@ts-ignore
-      value: [idx++, value],
+      value: [idx++, value] as never,
       done,
     }),
   );
@@ -83,21 +70,20 @@ export const stepBy = <T>(
   step: number,
 ): ReIterator<T, T, unknown> => {
   const iterator = iterable[Symbol.iterator]();
-  //@ts-ignore
   return {
     [Symbol.iterator]() {
       return this;
     },
     next(...args) {
-      //@ts-ignore
-      const result = iterator.next(...args);
+      const result = iterator.next(...args as any);
       pumpIter(iterator)(step - 1);
       return result;
     },
   };
 };
 
-export const range = (start: 0, end = Infinity) => takeN(count(start), end);
+export const range = (start = 0, end = Infinity) =>
+  takeN(count(start), end - start);
 
 export const repeat = <T>(value: T): ReIterator<T, T, unknown> => ({
   [Symbol.iterator]() {
@@ -117,7 +103,6 @@ export const cycle = <T>(iterable: Iterable<T>): ReIterator<T, T, unknown> => {
     [Symbol.iterator]() {
       return this;
     },
-    //@ts-ignore
     next() {
       const { value, done } = iterator.next();
 
@@ -131,7 +116,7 @@ export const cycle = <T>(iterable: Iterable<T>): ReIterator<T, T, unknown> => {
   };
 };
 
-export const chain = <T extends any>(
+export const chain = <T>(
   ...iterables: Iterable<T>[]
 ): ReIterator<T, T, unknown> => {
   const iterators = iterables.map((x) => x[Symbol.iterator]());
@@ -141,7 +126,7 @@ export const chain = <T extends any>(
       iterators.shift();
       return iterators.length
         ? getNext()
-        : { value: undefined as unknown as any, done: true };
+        : { value: undefined as never, done: true };
     }
 
     return { value, done };
@@ -154,5 +139,31 @@ export const chain = <T extends any>(
     next() {
       return getNext();
     },
+  };
+};
+
+export const zip = <T>(
+  ...iterables: Iterable<T>[]
+): ReIterator<T[], T[], unknown> => {
+  const iterators = iterables.map((x) => x[Symbol.iterator]());
+  const zipNext = (): IteratorResult<T[], T[]> => {
+    const value = iterators.map((i) => i.next()).reduce<T[]>(
+      (acc, { value, done }) => {
+        return done ? acc : [...acc, value];
+      },
+      [],
+    );
+
+    return {
+      value,
+      done: value.length === 0,
+    };
+  };
+
+  return {
+    [Symbol.iterator]() {
+      return this;
+    },
+    next: () => zipNext(),
   };
 };
