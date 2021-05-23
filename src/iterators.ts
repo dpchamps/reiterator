@@ -14,7 +14,7 @@ export const take = <T>(
   wrap<T, T>(
     transpose<T, T, any>(({ value, done }) => ({
       value,
-      done: done || n-- === 0,
+      done: done || n-- <= 0,
     })),
   )(iterable);
 
@@ -175,7 +175,7 @@ export function zip<T, U, V, W, X>(
 
 export function zip(
   ...iterables: any[]
-): IterableIterator<any>{
+): IterableIterator<any> {
   const iterators = iterables.map((x) => x[Symbol.iterator]());
   const zipNext = (): IteratorResult<any> => {
     const value = iterators.map((i) => i.next()).reduce<any>(
@@ -197,4 +197,4 @@ export function zip(
     },
     next: () => zipNext(),
   };
-};
+}

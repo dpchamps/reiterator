@@ -127,11 +127,22 @@ Deno.test("chain -- It should chain multiple iterators", () => {
 
 Deno.test("zip -- It should zip mutiple iterators of equal length", () => {
   const i1 = range(0, 4);
-  const i2 = "abcde";
+  const i2 = "abcd";
   const i3 = range(2, 6);
-  
+
   assertEquals(
     Array.from(zip(i1, i2, i3)),
     [[0, "a", 2], [1, "b", 3], [2, "c", 4], [3, "d", 5]],
+  );
+});
+
+Deno.test("zip -- It should zip multiple iterators of unequal length", () => {
+  const i1 = [1, 2];
+  const i2 = "abc";
+  const i3 = ["Corn Pop"];
+
+  assertEquals(
+    Array.from(zip(i1, i2, i3)),
+    [[1, "a", "Corn Pop"], [2, "b"], ["c"]],
   );
 });
