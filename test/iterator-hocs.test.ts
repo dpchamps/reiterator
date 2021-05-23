@@ -1,11 +1,11 @@
 import { testing } from "../deps.ts";
 import {
-  reduceIterableSync,
-  mapIterableSync,
   filterIterableSync,
   forEachIterableSync,
+  mapIterableSync,
+  reduceIterableSync,
 } from "../src/iterator-hocs.ts";
-import { takeN, count } from "../src/iterators.ts";
+import { count, takeN } from "../src/iterators.ts";
 const { assertEquals } = testing;
 
 const reduceFib = (

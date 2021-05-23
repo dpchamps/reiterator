@@ -1,7 +1,7 @@
 {
-    "deno.enable": true,
-    "[typescript]": {
-        "editor.defaultFormatter": "axetroy.vscode-deno",
-    },
-    "files.autoSave": "afterDelay"
+  "deno.enable": true,
+  "[typescript]": {
+    "editor.defaultFormatter": "axetroy.vscode-deno"
+  },
+  "files.autoSave": "afterDelay"
 }

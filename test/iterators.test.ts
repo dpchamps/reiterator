@@ -1,12 +1,12 @@
 import {
-  takeN,
+  chain,
   count,
+  cycle,
   enumerate,
-  stepBy,
   range,
   repeat,
-  cycle,
-  chain,
+  stepBy,
+  takeN,
   zip,
 } from "../src/iterators.ts";
 import { testing } from "../deps.ts";
