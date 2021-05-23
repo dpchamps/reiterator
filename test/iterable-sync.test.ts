@@ -1,7 +1,6 @@
 import { assertEquals } from "../src/3p/testing.ts";
 import { map, reduce, filter } from "../src/iterable-sync.ts";
 import { collect, evaluate } from "../src/collect.ts";
-import { fromIterable, intoIterable } from "../src/common.ts";
 
 Deno.test("It reduces primitive values", () => {
   const reducer = reduce(
@@ -48,4 +47,15 @@ Deno.test("It filters iterables", () => {
         collect(filtered([1,2,3,4])),
         [2, 4]
     )
-})
+});
+
+Deno.test("It collects into an appropriate value for empty filter", () => {
+    const filtered = filter(
+        (el: string|number): el is string => typeof el === 'string'
+    );
+
+    assertEquals(
+        collect(filtered([1,2,3,4])),
+        []
+    )
+});
