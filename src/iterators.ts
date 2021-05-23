@@ -1,14 +1,16 @@
 import { transpose, TypedIterable, wrap } from "./common.ts";
 
-export const skip = <T, TReturn, TNext>(
+export const skip = <T, TReturn = any, TNext = undefined>(
   iter: Iterator<T, TReturn, TNext>,
   times: number,
 ) => {
   while (times-- > 0) iter.next();
+
+  return iter;
 };
 
 export const take = <T>(
-  iterable: TypedIterable<T, any, undefined>,
+  iterable: Iterable<T>,
   n: number,
 ) =>
   wrap<T, T>(

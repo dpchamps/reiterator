@@ -16,6 +16,16 @@ export const indexable = <T, U, TReturn = any>(
     done,
   }));
 
+export const each = <T, TReturn = any>(
+  callback: (el: T | TReturn, index: number) => void,
+) =>
+  wrap<T, T, TReturn>(
+    indexable((el, idx) => {
+      callback(el, idx);
+      return el;
+    }),
+  );
+
 export const reduce = <T, U, TReturn = any>(
   callback: ReduceCallback<T | TReturn, U>,
   initialValue: U,
