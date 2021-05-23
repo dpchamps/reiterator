@@ -35,12 +35,15 @@ export const intoIterable = <T, TReturn = any, TNext = undefined>(
 });
 
 export const transpose = <T, U, UReturn, TReturn = any, TNext = undefined>(
-  cb: (result: IteratorResult<T, TReturn>) => IteratorResult<U, UReturn>,
+  cb: (
+    result: IteratorResult<T, TReturn>,
+    iter: Iterator<T, TReturn, TNext>,
+  ) => IteratorResult<U, UReturn>,
 ) =>
   (
     iter: Iterator<T, TReturn, TNext>,
   ) => ({
-    next: (...args: [] | [TNext]) => cb(iter.next(...args)),
+    next: (...args: [] | [TNext]) => cb(iter.next(...args), iter),
   });
 
 export const wrap = <

@@ -5,7 +5,7 @@ import {
   mapIterableSync,
   reduceIterableSync,
 } from "../src/iterator-hocs.ts";
-import { count, takeN } from "../src/iterators.ts";
+import { count, take } from "../src/iterators.ts";
 const { assertEquals } = testing;
 
 const reduceFib = (
@@ -49,7 +49,7 @@ Deno.test("It reduces an iterable to a value", () => {
 });
 
 Deno.test("It maps values", () => {
-  const mapFib = mapIterableSync(takeN(fibGen(), 5))(
+  const mapFib = mapIterableSync(take(fibGen(), 5))(
     (el, idx) => el + idx,
   );
 
@@ -60,7 +60,7 @@ Deno.test("It maps values", () => {
 });
 
 Deno.test("It filters an iterable", () => {
-  const evenFib = filterIterableSync(takeN(fibGen(), 10))(
+  const evenFib = filterIterableSync(take(fibGen(), 10))(
     (item: number): item is number => item % 2 === 0,
   );
 
@@ -72,13 +72,13 @@ Deno.test("It filters an iterable", () => {
 
 Deno.test("filterIterableSync - returns an empty array when no elements satisfy a condition", () => {
   assertEquals(
-    Array.from(filterIterableSync(takeN(count(5), 5))((el) => el < 5)),
+    Array.from(filterIterableSync(take(count(5), 5))((el) => el < 5)),
     [],
   );
 });
 
 Deno.test("Map/Filter/Reduce composition", () => {
-  const baseIter = takeN(count(), 10);
+  const baseIter = take(count(), 10);
   const sum = (a: number, b: number) => a + b;
   const square = (x: number) => x * x;
   const isOdd = (x: number) => (x / 2 | 0) !== (x / 2);
@@ -97,7 +97,7 @@ Deno.test("Map/Filter/Reduce composition", () => {
 });
 
 Deno.test("ForEach should consume the iterator", () => {
-  const numbers = takeN(count(1), 10);
+  const numbers = take(count(1), 10);
   let pointer = 0;
   forEachIterableSync(numbers)((item, index) => {
     assertEquals(item, pointer + 1);

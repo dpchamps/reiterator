@@ -1,5 +1,5 @@
 import { assertEquals } from "../src/3p/testing.ts";
-import { map, reduce, filter } from "../src/iterable-sync.ts";
+import { filter, map, reduce } from "../src/iterable-sync.ts";
 import { collect, evaluate } from "../src/collect.ts";
 
 Deno.test("It reduces primitive values", () => {
@@ -39,23 +39,23 @@ Deno.test("It maps iterables", () => {
 });
 
 Deno.test("It filters iterables", () => {
-    const filtered = filter(
-        (el: number) => el % 2 ===0 
-    );
+  const filtered = filter(
+    (el: number) => el % 2 === 0,
+  );
 
-    assertEquals(
-        collect(filtered([1,2,3,4])),
-        [2, 4]
-    )
+  assertEquals(
+    collect(filtered([1, 2, 3, 4])),
+    [2, 4],
+  );
 });
 
 Deno.test("It collects into an appropriate value for empty filter", () => {
-    const filtered = filter(
-        (el: string|number): el is string => typeof el === 'string'
-    );
+  const filtered = filter(
+    (el: string | number): el is string => typeof el === "string",
+  );
 
-    assertEquals(
-        collect(filtered([1,2,3,4])),
-        []
-    )
+  assertEquals(
+    collect(filtered([1, 2, 3, 4])),
+    [],
+  );
 });
