@@ -29,11 +29,28 @@ export const intoIterable = <T, TReturn = any, TNext = undefined>(
   }),
 });
 
-export const transpose = <T, TReturn = any, TNext = undefined>(
-  iter: Iterator<T, TReturn, TNext>,
+export const transpose = <T, U, UReturn, TReturn = any, TNext = undefined>(
+  cb: (result: IteratorResult<T, TReturn>) => IteratorResult<U, UReturn>,
 ) =>
-  <U, UReturn>(
-    cb: (result: IteratorResult<T, TReturn>) => IteratorResult<U, UReturn>,
+  (
+    iter: Iterator<T, TReturn, TNext>,
   ) => ({
     next: (...args: [] | [TNext]) => cb(iter.next(...args)),
   });
+
+export const wrap = <
+  T,
+  U,
+  TReturn = any,
+  TNext = undefined,
+  UReturn = any,
+  UNext = undefined,
+>(
+  fn: (iterator: Iterator<T, TReturn, TNext>) => Iterator<U, UReturn, UNext>,
+) =>
+  (iterable: TypedIterable<T, TReturn, TNext>) =>
+    intoIterable(
+      fn(
+        fromIterable(iterable),
+      ),
+    );
