@@ -17,6 +17,11 @@ export type MapCallback<T, U> = (item: T, index: number) => U;
 
 export type FilterCallback<T> = (item: T, index: number) => unknown;
 
+export type LensedFilterCallback<T, S extends T> = (
+  item: T,
+  index: number,
+) => item is S;
+
 export const fromIterable = <T, TReturn = any, TNext = undefined>(
   iterable: TypedIterable<T, TReturn, TNext>,
 ) => iterable[Symbol.iterator]();

@@ -4,11 +4,7 @@ import {
   indexableIterable,
   MapCallback,
   ReduceCallback,
-} from "./common";
-export type LensedFilterCallback<T, S extends T> = (
-  item: T,
-  index: number,
-) => item is S;
+} from "./common.ts";
 
 export const reduceIterableSync = <T>(iterator: Iterable<T>) =>
   <U>(callback: ReduceCallback<T, U>, initialValue: U) => {
